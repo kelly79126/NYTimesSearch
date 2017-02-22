@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,12 +16,12 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.example.kelly79126.nytimessearch.activities.ArticleActivity;
 import com.example.kelly79126.nytimessearch.adapters.ArticleArrayAdapter;
 import com.example.kelly79126.nytimessearch.dialogfragments.FilterDialogFragment;
 import com.example.kelly79126.nytimessearch.models.Article;
+import com.example.kelly79126.nytimessearch.widget.EndlessScrollListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -41,6 +42,12 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     @BindView(R.id.etQuery) EditText etQuery;
     @BindView(R.id.gvResults) GridView gvResults;
     @BindView(R.id.btnSearch) Button btnSearch;
+    String mStrBeginDate = null;
+    String mStrSortOder = null;
+    String mStrNewsDesk = "";
+    int mIntPage = 0;
+    private boolean mbLoading = true;
+
 
     ArrayList<Article> articles;
     ArticleArrayAdapter adapter;
@@ -53,6 +60,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
+
         articles = new ArrayList<>();
         adapter = new ArticleArrayAdapter(this, articles);
         gvResults.setAdapter(adapter);
@@ -67,12 +75,36 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             }
         });
 
+        gvResults.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public boolean onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                loadNextDataFromApi(page);
+                // or loadNextDataFromApi(totalItemsCount);
+                Log.d("FilterDialogFragment", ""+mbLoading);
+                return mbLoading; // ONLY if more data is actually being loaded; false otherwise.
+            }
+        });
+
         if(false == isNetworkAvailable()){
             //add dialog
         }
         if(false == isOnline()){
             //add dialog
         }
+    }
+
+    // Append the next page of data into the adapter
+    // This method probably sends out a network request and appends new data items to your adapter.
+    public void loadNextDataFromApi(int offset) {
+        // Send an API request to retrieve appropriate paginated data
+        //  --> Send the request including an offset value (i.e `page`) as a query parameter.
+        //  --> Deserialize and construct new model objects from the API response
+        //  --> Append the new data objects to the existing set of items inside the array of items
+        //  --> Notify the adapter of the new items made with `notifyDataSetChanged()`
+        mIntPage = offset;
+        queryUrl(false);
     }
 
     @Override
@@ -102,30 +134,60 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     }
 
     @Override
-    public void onFinishFilterDialog(String inputText) {
-        Toast.makeText(this, "Hi, " + inputText, Toast.LENGTH_SHORT).show();
+    public void onFinishFilterDialog(String beginDate, String sortOrder, String newsdesk) {
+        mStrBeginDate = beginDate;
+        mStrSortOder = sortOrder;
+        mStrNewsDesk = newsdesk;
+        mIntPage = 0;
+        queryUrl(true);
     }
 
 
     public void onArticleSearch(View view) {
+        mIntPage = 0;
+        queryUrl(true);
+    }
+
+    private void queryUrl(final boolean bClear){
         String query = etQuery.getText().toString();
+        RequestParams params = new RequestParams();
+        params.put("api-key", "66f3d0fab5b84ac8ab49cf2cd61b9c34");
+        params.put("page", mIntPage);
+        if(!query.isEmpty())
+            params.put("q", query);
+        if(mStrSortOder != null)
+            params.put("sort", mStrSortOder);
+        if(mStrBeginDate != null)
+            params.put("begin_date", mStrBeginDate);
+        if(!mStrNewsDesk.isEmpty())
+            params.put("fq", mStrNewsDesk);
+
 
         AsyncHttpClient client = new AsyncHttpClient();
         String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
 
-        RequestParams params = new RequestParams();
-        params.put("api-key", "66f3d0fab5b84ac8ab49cf2cd61b9c34");
-        params.put("page", 0);
-        params.put("q", query);
+        Log.d("FilterDialogFragment", params.toString());
 
         client.get(url, params, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 JSONArray articleJsonResults = null;
                 try {
-                    adapter.clear();
+                    if(bClear) {
+                        adapter.clear();
+                    }
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                    Log.d("FilterDialogFragment", articleJsonResults.toString());
+                    Log.d("FilterDialogFragment", "" + articleJsonResults.length());
+
+                    if(articleJsonResults.length() > 0) {
+                        mbLoading = true;
+                    }else {
+                        mbLoading = false;
+                    }
+
                     adapter.addAll(Article.fromJsonArray(articleJsonResults));
+                    adapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

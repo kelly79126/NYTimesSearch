@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -18,6 +19,10 @@ import com.example.kelly79126.nytimessearch.R;
 
 import java.sql.Date;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 /**
  * Created by kelly79126 on 2017/2/21.
  */
@@ -25,14 +30,19 @@ import java.sql.Date;
 public class FilterDialogFragment extends DialogFragment
                                 implements Button.OnClickListener, DatePickerDialog.OnDateSetListener{
 
-    private TextView tvBeginDate;
-    private Spinner spSortOrder;
-    private Button btnSave;
+    @BindView(R.id.tv_begin_date) TextView tvBeginDate;
+    @BindView(R.id.sp_sort_order) Spinner spSortOrder;
+    Button btnSave;
+    @BindView(R.id.checkbox_fashion_style) CheckBox checkFashion;
+    @BindView(R.id.checkbox_arts) CheckBox checkArts;
+    @BindView(R.id.checkbox_sports) CheckBox checkSports;
+
+    private String mStrBeginDate;
+    private Unbinder unbinder;
 
     public interface FilterDialogListener {
-        void onFinishFilterDialog(String inputText);
+        void onFinishFilterDialog(String beginDate, String sortOrder, String newsDesk);
     }
-
 
     public FilterDialogFragment() {
         // Empty constructor is required for DialogFragment
@@ -51,19 +61,23 @@ public class FilterDialogFragment extends DialogFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_filter, container);
+        View view = inflater.inflate(R.layout.dialog_filter, container);
+        unbinder = ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        tvBeginDate = (TextView) view.findViewById(R.id.tv_begin_date);
-        spSortOrder = (Spinner) view.findViewById(R.id.sp_sort_order);
         btnSave = (Button) view.findViewById(R.id.btn_save);
-
         tvBeginDate.setOnClickListener(this);
         btnSave.setOnClickListener(this);
+    }
+
+    @Override public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     @Override
@@ -74,20 +88,28 @@ public class FilterDialogFragment extends DialogFragment
                 break;
             case R.id.btn_save:
                 FilterDialogListener listener = (FilterDialogListener) getActivity();
-                listener.onFinishFilterDialog(spSortOrder.getSelectedItem().toString());
+                listener.onFinishFilterDialog(mStrBeginDate, spSortOrder.getSelectedItem().toString(), checkCheckBox());
                 dismiss();
                 break;
         }
     }
 
+    public String checkCheckBox(){
+        String newsdesk = "";
 
-//    @Override
-//    public Dialog onCreateDialog(Bundle savedInstanceState) {
-//        Dialog dialog = super.onCreateDialog(savedInstanceState);
-//        // request a window without the title
-//        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-//        return dialog;
-//    }
+        if(checkArts.isChecked())
+            newsdesk = newsdesk + "\" Arts\"";
+        if(checkFashion.isChecked())
+            newsdesk = newsdesk + "\" Fashion & Style\"";
+        if(checkSports.isChecked())
+            newsdesk = newsdesk + "\" Sports\"";
+
+        if(!newsdesk.isEmpty()){
+            newsdesk = "(news_desk:(" + newsdesk + "))";
+        }
+
+        return newsdesk;
+    }
 
     public void showDatePickerDialog(View v) {
         FragmentManager fm = getFragmentManager();
@@ -97,13 +119,17 @@ public class FilterDialogFragment extends DialogFragment
     }
 
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        // store the values selected into a Calendar instance
-        showDateFormat(year, monthOfYear, dayOfMonth);
-    }
-
-    public void showDateFormat(int year, int month, int day) {
-        Date chosenDate = new Date(year-1900, month, day);
+        Date chosenDate = new Date(year-1900, monthOfYear, dayOfMonth);
         java.text.DateFormat dateFormat = DateFormat.getDateFormat(getContext());
         tvBeginDate.setText(dateFormat.format(chosenDate));
+        mStrBeginDate = "" + year + String.format("%02d", monthOfYear+1) + String.format("%02d", dayOfMonth);
     }
+
+//    @Override
+//    public Dialog onCreateDialog(Bundle savedInstanceState) {
+//        Dialog dialog = super.onCreateDialog(savedInstanceState);
+//        // request a window without the title
+//        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+//        return dialog;
+//    }
 }

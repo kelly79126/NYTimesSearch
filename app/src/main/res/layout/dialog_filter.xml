@@ -1,55 +1,98 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/edit_name"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:orientation="vertical"  >
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp">
-        <TextView
-            android:id="@+id/tv_begin_date_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Begin Date" />
-
-        <TextView
-            android:id="@+id/tv_begin_date"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/tv_begin_date_text"
-            android:layout_marginLeft="10dp"
-            android:textSize="20sp"/>
-    </RelativeLayout>
-
-    <RelativeLayout
+    <TextView
+        android:id="@+id/tv_begin_date_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp">
-        <TextView
-            android:id="@+id/tv_sort_order_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Sort order" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="50dp"
+        android:textSize="20sp"
+        android:text="Begin Date" />
 
-        <Spinner
-            android:id="@+id/sp_sort_order"
+    <TextView
+        android:id="@+id/tv_begin_date"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/tv_begin_date_text"
+        android:layout_alignBottom="@+id/tv_begin_date_text"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="60dp"
+        android:textSize="20sp"
+        tools:text="2017/02/21"/>
+
+    <View
+        android:layout_width="150dp"
+        android:layout_height="1dp"
+        android:layout_below="@+id/tv_begin_date"
+        android:layout_alignLeft="@+id/tv_begin_date"
+        android:layout_alignRight="@+id/tv_begin_date"
+        android:background="@color/colorPrimaryDark">
+    </View>
+
+    <TextView
+        android:id="@+id/tv_sort_order_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_begin_date_text"
+        android:layout_alignLeft="@+id/tv_begin_date_text"
+        android:layout_marginTop="50dp"
+        android:textSize="20sp"
+        android:text="Sort order" />
+
+    <Spinner
+        android:id="@+id/sp_sort_order"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_begin_date"
+        android:layout_alignLeft="@+id/tv_begin_date"
+        android:layout_alignTop="@+id/tv_sort_order_text"
+        android:textSize="20sp"
+        android:entries="@array/order_array" />
+
+    <TextView
+        android:id="@+id/tv_news_desk_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_sort_order_text"
+        android:layout_alignLeft="@+id/tv_begin_date_text"
+        android:layout_marginTop="50dp"
+        android:textSize="20sp"
+        android:text="News desk" />
+
+    <LinearLayout
+        android:id="@+id/vg_news_desk"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tv_begin_date"
+        android:layout_alignTop="@+id/tv_news_desk_text">
+        <CheckBox android:id="@+id/checkbox_arts"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/tv_sort_order_text"
-            android:layout_marginLeft="10dp"
-            android:textSize="20sp"
-            android:entries="@array/order_array" />
-    </RelativeLayout>
+            android:text="Arts" />
+        <CheckBox android:id="@+id/checkbox_fashion_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/fashion_style" />
+        <CheckBox android:id="@+id/checkbox_sports"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sports" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Save"
-        android:layout_marginTop="50dp" />
-</LinearLayout>
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp"
+        android:layout_below="@+id/vg_news_desk"
+        android:layout_alignRight="@+id/tv_begin_date"
+        android:text="Save" />
+</RelativeLayout>

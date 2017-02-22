@@ -48,3 +48,44 @@ public class ArticleArrayAdapter extends ArrayAdapter<Article> {
         return convertView;
     }
 }
+
+/*
+public class ArticleArrayAdapter extends ArrayAdapter<Article> {
+
+    static class ViewHolder {
+        @BindView(R.id.ivImage) ImageView ivImage;
+        @BindView(R.id.tvTitle) TextView tvTitle;
+
+        public ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    public ArticleArrayAdapter(Context context, List<Article> articles){
+        super(context, android.R.layout.simple_list_item_1, articles);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent){
+        Article article = this.getItem(position);
+        ViewHolder viewHolder;
+
+        if(convertView == null){
+            viewHolder = new ViewHolder(convertView);
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            convertView = inflater.inflate(R.layout.item_article_result, parent, false);
+            convertView.setTag(viewHolder);
+        }else{
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+
+        String thumbnail = article.getThumbNail();
+        if(!TextUtils.isEmpty(thumbnail)){
+            Picasso.with(getContext()).load(thumbnail).fit().into(viewHolder.ivImage);
+        }
+        viewHolder.tvTitle.setText(article.getHeadline());
+
+        return convertView;
+    }
+}
+*/
