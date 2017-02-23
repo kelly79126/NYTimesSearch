@@ -11,15 +11,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
 
 import com.example.kelly79126.nytimessearch.R;
@@ -45,9 +46,9 @@ import cz.msebera.android.httpclient.Header;
 
 public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.FilterDialogListener{
 
-    @BindView(R.id.etQuery) EditText etQuery;
     @BindView(R.id.gvResults) GridView gvResults;
-    @BindView(R.id.btnSearch) Button btnSearch;
+
+    String mStrQuery = "";
     String mStrBeginDate = null;
     String mStrSortOder = null;
     String mStrNewsDesk = "";
@@ -141,8 +142,34 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_search, menu);
-        return true;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_search, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        // Expand the search view and request focus
+        searchItem.expandActionView();
+        searchView.requestFocus();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // perform query here
+                mStrQuery = query;
+                queryUrl(true);
+                // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
+                // see https://code.google.com/p/android/issues/detail?id=24599
+                searchView.clearFocus();
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+
     }
 
     @Override
@@ -180,12 +207,11 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     }
 
     private void queryUrl(final boolean bClear){
-        String query = etQuery.getText().toString();
         RequestParams params = new RequestParams();
         params.put("api-key", "66f3d0fab5b84ac8ab49cf2cd61b9c34");
         params.put("page", mIntPage);
-        if(!query.isEmpty())
-            params.put("q", query);
+        if(!mStrQuery.isEmpty())
+            params.put("q", mStrQuery);
         if(mStrSortOder != null)
             params.put("sort", mStrSortOder);
         if(mStrBeginDate != null)

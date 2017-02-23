@@ -7,10 +7,10 @@
     <ImageView
         android:id="@+id/ivImage"
         android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_height="80dp"
         android:scaleType="center"
         android:adjustViewBounds="true"
-        android:background="@drawable/newyorktimes"/>
+        android:background="@color/colorWhite"/>
 
     <TextView
         android:id="@+id/tvTitle"
