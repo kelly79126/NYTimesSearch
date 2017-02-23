@@ -1,17 +1,38 @@
 package com.example.kelly79126.nytimessearch.models;
 
+import android.os.Parcelable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcel;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by kelly79126 on 2017/2/20.
  */
 
-public class Article implements Serializable{
+@Parcel
+public class Article implements Parcelable{
+    protected Article(android.os.Parcel in) {
+        webUrl = in.readString();
+        headline = in.readString();
+        thumbNail = in.readString();
+    }
+
+    public static final Creator<Article> CREATOR = new Creator<Article>() {
+        @Override
+        public Article createFromParcel(android.os.Parcel in) {
+            return new Article(in);
+        }
+
+        @Override
+        public Article[] newArray(int size) {
+            return new Article[size];
+        }
+    };
+
     public String getWebUrl() {
         return webUrl;
     }
@@ -27,6 +48,16 @@ public class Article implements Serializable{
     String webUrl;
     String headline;
     String thumbNail;
+
+    // empty constructor needed by the Parceler library
+    public Article(){
+    }
+
+    public Article(String webUrl, String headline, String thumbNail) {
+        this.webUrl = webUrl;
+        this.headline = headline;
+        this.thumbNail = thumbNail;
+    }
 
     public Article(JSONObject jsonObject){
         try {
@@ -56,5 +87,17 @@ public class Article implements Serializable{
             }
         }
         return results;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(android.os.Parcel dest, int flags) {
+        dest.writeString(webUrl);
+        dest.writeString(headline);
+        dest.writeString(thumbNail);
     }
 }

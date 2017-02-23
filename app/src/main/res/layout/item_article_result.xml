@@ -6,8 +6,8 @@
 
     <ImageView
         android:id="@+id/ivImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:scaleType="center"
         android:adjustViewBounds="true"
         android:background="@drawable/newyorktimes"/>

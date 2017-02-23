@@ -1,10 +1,15 @@
-package com.example.kelly79126.nytimessearch;
+package com.example.kelly79126.nytimessearch.activities;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,9 +22,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 
-import com.example.kelly79126.nytimessearch.activities.ArticleActivity;
+import com.example.kelly79126.nytimessearch.R;
 import com.example.kelly79126.nytimessearch.adapters.ArticleArrayAdapter;
 import com.example.kelly79126.nytimessearch.dialogfragments.FilterDialogFragment;
+import com.example.kelly79126.nytimessearch.dialogfragments.NoInternetDialogFragment;
 import com.example.kelly79126.nytimessearch.models.Article;
 import com.example.kelly79126.nytimessearch.widget.EndlessScrollListener;
 import com.loopj.android.http.AsyncHttpClient;
@@ -68,10 +74,11 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         gvResults.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getApplicationContext(), ArticleActivity.class);
+//                Intent i = new Intent(getApplicationContext(), ArticleActivity.class);
                 Article article = articles.get(position);
-                i.putExtra("article", article);
-                startActivity(i);
+//                i.putExtra("article", Parcels.wrap(article));
+//                startActivity(i);
+                openChromeCustom(article);
             }
         });
 
@@ -87,12 +94,36 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             }
         });
 
-        if(false == isNetworkAvailable()){
-            //add dialog
-        }
-        if(false == isOnline()){
-            //add dialog
-        }
+        checkInternetAvailable();
+    }
+
+    public void openChromeCustom(Article article){
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_share);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, article.getWebUrl());
+
+        int requestCode = 100;
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+
+        // Map the bitmap, text, and pending intent to this icon
+        // Set tint to be true so it matches the toolbar color
+        builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
+
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(this, Uri.parse(article.getWebUrl()));
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        checkInternetAvailable();
     }
 
     // Append the next page of data into the adapter
@@ -216,5 +247,13 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         } catch (IOException e)          { e.printStackTrace(); }
         catch (InterruptedException e) { e.printStackTrace(); }
         return false;
+    }
+
+    public void checkInternetAvailable(){
+        if(false == isNetworkAvailable() || false == isOnline()){
+            FragmentManager fm = getSupportFragmentManager();
+            NoInternetDialogFragment alertDialog = NoInternetDialogFragment.newInstance("Internet is not available");
+            alertDialog.show(fm, "fragment_alert");
+        }
     }
 }

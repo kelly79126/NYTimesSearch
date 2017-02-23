@@ -1,11 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.kelly79126.nytimessearch.SearchActivity">
+    tools:context="com.example.kelly79126.nytimessearch.activities.SearchActivity">
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="200"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_sort_black_24dp"
         android:title="filter"
         app:showAsAction="ifRoom" />
 </menu>
